@@ -1,0 +1,17 @@
+# Dependências
+node_modules/
+
+# Build de produção
+dist/
+
+# Cache do Astro e Vite
+.astro/
+.vite/
+
+# Arquivos do sistema operacional (Windows/Mac)
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente (se houver)
+.env
+.env.production
