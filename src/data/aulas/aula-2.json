@@ -1,10 +1,10 @@
 {
   "id": 2,
   "ordem": 2,
-  "titulo": "Nome da sua aula aqui",
-  "descricao": "Uma pequena descrição da aula.",
-  "modulo": "Módulo 2",
+  "titulo": "Regras para calcular no Excel 02",
+  "descricao": "Regras para calcular no Excel, o que ajuda os iniciantes.",
+  "modulo": "Excel",
   "duracao": "09 min",
   "professor": "Agostinho Vasco",
-  "youtube_id": "ee7r0ywltb"
+  "wistia_id": "ee7r0ywltb"
 }
