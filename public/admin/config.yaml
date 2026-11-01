@@ -1,0 +1,39 @@
+# public/admin/config.yml
+backend:
+  name: github
+  repo: SEU-USUARIO/aulas-em-casa   # <-- troque pelo seu usuário/repo
+  branch: main
+  base_url: https://api.netlify.com  # usado apenas se auth_type = implicit
+  auth_type: pkce                    # login OAuth direto pelo GitHub
+
+# Define onde o Sveltia coloca os uploads de mídia (thumbnails)
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+# ⚠️ NÃO habilite editorial_workflow se for usar commit direto no main.
+locale: pt
+
+collections:
+  - name: "aulas"
+    label: "Aulas"
+    label_singular: "Aula"
+    folder: "src/data/aulas"
+    create: true
+    delete: true
+    format: "json"
+    extension: "json"
+    slug: "aula-{{fields.id}}"          # gera aula-1.json, aula-2.json, etc.
+    identifier_field: "titulo"
+    summary: "{{fields.ordem}} · {{fields.titulo}} ({{fields.modulo}})"
+    sortable_fields: ["ordem", "titulo", "modulo"]
+    fields:
+      - { name: "id",         label: "ID (número único)",  widget: "number", value_type: "int", required: true }
+      - { name: "ordem",      label: "Ordem de exibição", widget: "number", value_type: "int", default: 1 }
+      - { name: "titulo",     label: "Título",             widget: "string" }
+      - { name: "descricao",  label: "Descrição",          widget: "text" }
+      - { name: "modulo",     label: "Módulo",             widget: "string" }
+      - { name: "duracao",    label: "Duração (ex: 12 min)", widget: "string" }
+      - { name: "professor",  label: "Professor(a)",       widget: "string" }
+      - { name: "wistia_id",  label: "Wistia ID (opcional)",  widget: "string", required: false, hint: "Ex: zyklg452zv" }
+      - { name: "youtube_id", label: "YouTube ID (opcional)", widget: "string", required: false, hint: "Ex: dQw4w9WgXcQ" }
+      - { name: "thumbnail",  label: "Thumbnail (opcional)",  widget: "image",  required: false, choose_url: false }

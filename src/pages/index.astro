@@ -1,0 +1,223 @@
+---
+// src/pages/index.astro
+import Base from '../layouts/Base.astro';
+import AulaCard, { type Aula } from '../components/AulaCard.astro';
+
+const modules = import.meta.glob<{ default: Aula }>(
+  '/src/data/aulas/*.json',
+  { eager: true }
+);
+
+const aulas: Aula[] = Object.values(modules)
+  .map((m) => m.default)
+  .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+
+// Extrai todos os módulos únicos para criar os botões de filtro
+const modulosUnicos = Array.from(new Set(aulas.map((a) => a.modulo))).filter(Boolean);
+const total = aulas.length;
+---
+<Base title="Aulas em Casa — Assista no seu ritmo">
+  <header class="hero">
+    <div class="container">
+      <div class="brand">
+        <img src="/favicon.svg" alt="Logo" class="logo-img" />
+        <span>Aulas em <strong>Casa</strong></span>
+      </div>
+      <h1>Assista às aulas <span class="accent">no seu ritmo</span></h1>
+      <p class="sub">
+        {total > 0
+          ? `${total} ${total === 1 ? 'aula disponível' : 'aulas disponíveis'} · clique em um cartão para assistir sem sair da página.`
+          : 'Nenhuma aula publicada ainda. Volte em breve.'}
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Área de Filtros -->
+    {aulas.length > 0 && (
+      <div class="filtros">
+        <button class="filtro-btn active" data-filter="all">Todas</button>
+        {modulosUnicos.map((modulo) => (
+          <button class="filtro-btn" data-filter={modulo}>{modulo}</button>
+        ))}
+      </div>
+    )}
+
+    <!-- Grade de Aulas -->
+    {aulas.length > 0 ? (
+      <section class="grid" id="gridAulas">
+        {aulas.map((aula) => (
+          <div class="aula-wrapper" data-modulo={aula.modulo}>
+            <AulaCard aula={aula} />
+          </div>
+        ))}
+      </section>
+    ) : (
+      <div class="empty">
+        <p>📚 As aulas aparecerão aqui assim que forem lançadas pelo painel.</p>
+      </div>
+    )}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <p>© {new Date().getFullYear()} Aulas em Casa · Todos os direitos reservados.</p>
+        <p class="author">Desenvolvido por <strong>Agostinho Vasco</strong></p>
+        <p class="contact">📞 Contato: <a href="tel:+955123317">+955 123 317</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <div class="modal" id="videoModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Player de vídeo">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <button class="modal-close" data-close aria-label="Fechar vídeo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-player" id="modalPlayer"></div>
+    </div>
+  </div>
+
+  <style>
+    .hero { padding: 40px 0 28px; border-bottom: 1px solid var(--border); background: radial-gradient(ellipse at top left, rgba(110, 231, 183, 0.08), transparent 60%); }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text-dim); margin-bottom: 22px; }
+    .brand strong { color: var(--text); font-weight: 800; }
+    .logo-img { width: 28px; height: 28px; }
+    h1 { font-size: clamp(28px, 6vw, 44px); font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; }
+    .accent { color: var(--accent); }
+    .sub { margin-top: 12px; color: var(--text-dim); font-size: 15px; max-width: 560px; }
+
+    /* Estilos dos Filtros */
+    .filtros {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 24px 0 8px;
+      scrollbar-width: none; /* Firefox */
+    }
+    .filtros::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+    .filtro-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .filtro-btn:hover { border-color: var(--accent); color: var(--text); }
+    .filtro-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 16px 0 48px; }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 20px; } }
+    @media (min-width: 960px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    
+    /* Esconde os cartões filtrados */
+    .aula-wrapper { display: block; }
+    .aula-wrapper.hidden { display: none; }
+
+    .empty { padding: 60px 0; text-align: center; color: var(--text-dim); }
+
+    .site-footer { border-top: 1px solid var(--border); padding: 32px 0; text-align: center; color: var(--text-dim); font-size: 14px; }
+    .footer-content { display: flex; flex-direction: column; gap: 8px; }
+    .author strong { color: var(--accent); }
+    .contact a { color: var(--text); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+    .contact a:hover { color: var(--accent); }
+
+    /* Modal CSS (Inalterado, já forçando o vídeo a preencher tudo) */
+    .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal.open { display: flex; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(5, 7, 10, 0.86); backdrop-filter: blur(6px); }
+    .modal-content { position: relative; width: 100%; max-width: 960px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; animation: pop 0.2s ease; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); }
+    @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .modal-close { color: var(--text-dim); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; transition: background 0.15s ease, color 0.15s ease; }
+    .modal-close:hover { background: var(--border); color: var(--text); }
+    .modal-player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+    .modal-player iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    .modal-player .no-video { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-dim); font-size: 14px; text-align: center; padding: 24px; }
+  </style>
+
+  <script>
+    // ===== Lógica do Modal =====
+    const modal = document.getElementById('videoModal') as HTMLElement;
+    const modalTitle = document.getElementById('modalTitle') as HTMLElement;
+    const modalPlayer = document.getElementById('modalPlayer') as HTMLElement;
+
+    function openModal(titulo: string, embed: string, provider: string) {
+      modalTitle.textContent = titulo;
+      if (embed && provider !== 'none') {
+        modalPlayer.innerHTML = `<iframe src="${embed}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="${titulo}"></iframe>`;
+      } else {
+        modalPlayer.innerHTML = '<div class="no-video">Esta aula ainda não possui vídeo configurado.</div>';
+      }
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      modalPlayer.innerHTML = '';
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll<HTMLElement>('.aula-card').forEach((card) => {
+      const handler = () => {
+        openModal(card.dataset.titulo || '', card.dataset.embed || '', card.dataset.provider || 'none');
+      };
+      card.addEventListener('click', handler);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+      });
+    });
+
+    modal.querySelectorAll<HTMLElement>('[data-close]').forEach((el) => {
+      el.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+    // ===== Lógica do Filtro de Módulos =====
+    const filtroBtns = document.querySelectorAll<HTMLElement>('.filtro-btn');
+    const aulasWrappers = document.querySelectorAll<HTMLElement>('.aula-wrapper');
+
+    filtroBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        // Remove a classe 'active' de todos e adiciona no clicado
+        filtroBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filtro = btn.dataset.filter;
+
+        aulasWrappers.forEach((wrapper) => {
+          const moduloAula = wrapper.dataset.modulo;
+          
+          if (filtro === 'all' || moduloAula === filtro) {
+            wrapper.classList.remove('hidden');
+          } else {
+            wrapper.classList.add('hidden');
+          }
+        });
+      });
+    });
+  </script>
+</Base>

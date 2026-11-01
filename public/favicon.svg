@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Fundo -->
+  <rect width="100" height="100" rx="20" fill="#0F1115"/>
+  <!-- Contorno da casa -->
+  <path d="M 25 50 L 50 25 L 75 50 L 75 80 L 25 80 Z" fill="none" stroke="#6EE7B7" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Triângulo de Play no centro -->
+  <path d="M 42 45 L 62 55 L 42 65 Z" fill="#6EE7B7" stroke="#6EE7B7" stroke-width="2" stroke-linejoin="round"/>
+</svg>

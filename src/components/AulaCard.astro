@@ -1,0 +1,192 @@
+---
+// src/components/AulaCard.astro
+export interface Aula {
+  id: number;
+  ordem: number;
+  titulo: string;
+  descricao: string;
+  modulo: string;
+  duracao: string;
+  professor: string;
+  wistia_id?: string;
+  youtube_id?: string;
+  thumbnail?: string;
+}
+
+interface Props {
+  aula: Aula;
+}
+const { aula } = Astro.props;
+
+// Monta a URL de embed com base no provider disponível.
+let embedUrl = '';
+let provider: 'wistia' | 'youtube' | 'none' = 'none';
+
+if (aula.wistia_id) {
+  provider = 'wistia';
+  embedUrl = `https://fast.wistia.net/embed/iframe/${aula.wistia_id}?videoFoam=true`;
+} else if (aula.youtube_id) {
+  provider = 'youtube';
+  embedUrl = `https://www.youtube.com/embed/${aula.youtube_id}?rel=0`;
+}
+
+// Thumbnail: usa a informada, ou cai no thumb do YouTube se existir.
+const thumb =
+  aula.thumbnail ||
+  (aula.youtube_id ? `https://i.ytimg.com/vi/${aula.youtube_id}/hqdefault.jpg` : '');
+---
+
+<article
+  class="aula-card"
+  data-titulo={aula.titulo}
+  data-embed={embedUrl}
+  data-provider={provider}
+  data-has-video={provider !== 'none' ? 'true' : 'false'}
+  tabindex="0"
+  role="button"
+  aria-label={`Assistir aula: ${aula.titulo}`}
+>
+  <div class="thumb">
+    {thumb ? (
+      <img src={thumb} alt={aula.titulo} loading="lazy" />
+    ) : (
+      <div class="thumb-fallback">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+      </div>
+    )}
+    <span class="play-badge" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </span>
+    <span class="duracao">{aula.duracao}</span>
+  </div>
+
+  <div class="body">
+    <span class="modulo">{aula.modulo}</span>
+    <h3 class="titulo">{aula.titulo}</h3>
+    <p class="descricao">{aula.descricao}</p>
+    <span class="professor">{aula.professor}</span>
+  </div>
+</article>
+
+<style>
+  .aula-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    cursor: pointer;
+  }
+
+  .aula-card:hover,
+  .aula-card:focus-visible {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: var(--card-hover);
+    outline: none;
+  }
+
+  .thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #10131a;
+    overflow: hidden;
+  }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .aula-card:hover .thumb img {
+    transform: scale(1.04);
+  }
+
+  .thumb-fallback {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--text-dim);
+    background: linear-gradient(135deg, #161a21, #0f1218);
+  }
+
+  .play-badge {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(15, 17, 21, 0.72);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    backdrop-filter: blur(4px);
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .aula-card:hover .play-badge {
+    background: var(--accent);
+    color: var(--bg);
+    transform: scale(1.08);
+  }
+
+  .duracao {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .body {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .modulo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .titulo {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .descricao {
+    font-size: 14px;
+    color: var(--text-dim);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .professor {
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+</style>

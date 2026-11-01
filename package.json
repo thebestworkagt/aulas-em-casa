@@ -1,0 +1,16 @@
+{
+  "name": "aulas-em-casa",
+  "version": "1.0.0",
+  "description": "Aulas em Casa — plataforma de aulas em vídeo",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^4.16.0"
+  }
+}
